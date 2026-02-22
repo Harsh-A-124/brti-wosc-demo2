@@ -37,27 +37,20 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Constants ──────────────────────────────────────────────────────────────────
-MODEL_PATHS = {
-    "YOLOv8n":       "models/yolov8n.pt",
-    "YOLOv8m":   "models/yolov8m.pt",
-    "YOLOv11m":  "models/yolov11m.pt",
-}
-
 CLASS_COLORS = {
     "Human":       (0, 200, 100),
     "Rip_Current": (0, 60, 255),
 }
 
-# Per-class confidence thresholds
 CONF_THRESHOLDS = {
     "Human":       0.6,
-    "Rip_Current": 0.25,
+    "Rip_Current": 0.3,
 }
 
 # ── Model loader ───────────────────────────────────────────────────────────────
 @st.cache_resource
-def load_model(name: str) -> YOLO:
-    return YOLO(MODEL_PATHS[name])
+def load_model() -> YOLO:
+    return YOLO("models/yolov8n.pt")
 
 # ── Shared detection state ─────────────────────────────────────────────────────
 class DetectionState:
@@ -76,8 +69,6 @@ class VideoProcessor:
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
         img = frame.to_ndarray(format="bgr24")
 
-        # Run at the lowest threshold so the model returns all candidates,
-        # then filter per class manually below
         results = self.model.predict(
             source=img,
             conf=min(CONF_THRESHOLDS.values()),
@@ -93,7 +84,6 @@ class VideoProcessor:
                 label  = self.model.names[cls_id]
                 conf_v = float(box.conf[0])
 
-                # Apply per-class threshold
                 if conf_v < CONF_THRESHOLDS.get(label, 0.5):
                     continue
 
@@ -102,8 +92,7 @@ class VideoProcessor:
 
                 cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
 
-                # text = f"{label} {conf_v:.0%}"
-                text = f"{label}"
+                text = f"{label} {conf_v:.0%}"
                 (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.55, 2)
                 cv2.rectangle(img, (x1, y1 - th - 8), (x1 + tw + 6, y1), color, -1)
                 cv2.putText(img, text, (x1 + 3, y1 - 4),
@@ -117,7 +106,7 @@ class VideoProcessor:
             overlay = img.copy()
             cv2.rectangle(overlay, (0, 0), (img.shape[1], 52), (0, 0, 200), -1)
             cv2.addWeighted(overlay, 0.45, img, 0.55, 0, img)
-            cv2.putText(img, "WARNING: RIP CURRENT",
+            cv2.putText(img, "WARNING: RIP CURRENT DETECTED",
                         (10, 34), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 2)
 
         with detection_state.lock:
@@ -138,12 +127,11 @@ RTC_CONFIG = RTCConfiguration({
 st.title("🌊 Coastal Safety Detector")
 st.caption("Real-time Human & Rip Current detection - runs on the server, works on any device.")
 
-model_choice = st.selectbox("Model", list(MODEL_PATHS.keys()))
-model = load_model(model_choice)
+model = load_model()
 
 # ── WebRTC stream ──────────────────────────────────────────────────────────────
 ctx = webrtc_streamer(
-    key=f"coastal-{model_choice}",
+    key="coastal-detector",
     mode=WebRtcMode.SENDRECV,
     rtc_configuration=RTC_CONFIG,
     video_processor_factory=lambda: VideoProcessor(model),
@@ -151,7 +139,8 @@ ctx = webrtc_streamer(
         "video": {
             "width":  {"ideal": 640},
             "height": {"ideal": 480},
-            "facingMode": "environment",
+            "facingMode": {"ideal": "environment"},
+            "zoom":       {"ideal": 1},
         },
         "audio": False,
     },
