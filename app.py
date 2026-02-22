@@ -40,7 +40,7 @@ st.markdown("""
 MODEL_PATHS = {
     "YOLOv8n — Fast":       BASE_DIR / "models" / "yolov8n.pt",
     "YOLOv8m — Balanced":   BASE_DIR / "models" / "yolov8m.pt",
-    "YOLOv11m — Accurate":  BASE_DIR / "models" / "yolov11m.pt",,
+    "YOLOv11m — Accurate":  BASE_DIR / "models" / "yolov11m.pt",
 }
 
 CLASS_COLORS = {
