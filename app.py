@@ -9,7 +9,7 @@ from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Coastal Safety Detection",
+    page_title="BHARATI Rip Detector",
     page_icon="🌊",
     layout="centered",
     initial_sidebar_state="collapsed",
