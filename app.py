@@ -124,8 +124,8 @@ RTC_CONFIG = RTCConfiguration({
 })
 
 # ── UI ─────────────────────────────────────────────────────────────────────────
-st.title("🌊 Coastal Safety Detector")
-st.caption("Real-time Human & Rip Current detection - runs on the server, works on any device.")
+st.title("🌊 BHARATI Rip Detector")
+st.caption("Real-time Human & Rip Current detection - this is an experimental demo. The model is constantly being updated to improve accuracy.")
 
 model = load_model()
 
