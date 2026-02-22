@@ -38,9 +38,9 @@ st.markdown("""
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 MODEL_PATHS = {
-    "YOLOv8n — Fast":       "models/yolov8n.pt",
-    "YOLOv8m — Balanced":   "models/yolov8m.pt",
-    "YOLOv11m — Accurate":  "models/yolov11m.pt",
+    "YOLOv8n":       "models/yolov8n.pt",
+    "YOLOv8m":   "models/yolov8m.pt",
+    "YOLOv11m":  "models/yolov11m.pt",
 }
 
 CLASS_COLORS = {
